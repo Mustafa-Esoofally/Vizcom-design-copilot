@@ -1,0 +1,123 @@
+# System Architecture Overview
+
+## 1. Core Components
+
+### Frontend Layer
+- Framework: Next.js 14 (App Router)
+- UI: ShadCN/UI components
+- State: Zustand
+- File Handling: AWS S3 integration
+- Real-time: Server-sent events
+
+### Backend Layer
+- API: FastAPI
+- Database: 
+  - PostgreSQL (structured data)
+  - Pinecone (vector storage)
+  - Redis (caching/queues)
+- File Storage: AWS S3
+
+### AI/ML Layer
+A. Multi-Agent System
+- Brief Analysis Agent (GPT-4V + CLIP)
+- Style Intelligence Agent (Fashion-CLIP)
+- Creative Exploration Agent (SDXL Turbo + ControlNet)
+- Quality Assurance Agent (Custom ResNet)
+
+B. Memory Systems
+- Working Memory: Redis
+- Episodic Memory: Neo4j
+- Semantic Memory: Milvus
+- Procedural Memory: PostgreSQL
+
+## 2. Workflow Pipeline
+
+### Input Phase
+1. Design Brief Upload
+   - Text analysis (GPT-4)
+   - Visual reference processing (CLIP)
+   - Constraint extraction
+
+2. Asset Processing
+   - Image analysis
+   - Style categorization
+   - Brand alignment check
+
+### Processing Phase
+1. Brief Interpretation
+   - Theme extraction
+   - Style mapping
+   - Technical requirement analysis
+
+2. Creative Exploration
+   - Design variation generation
+   - Style transfer
+   - Pattern synthesis
+
+3. Quality Control
+   - Brand consistency check
+   - Technical feasibility
+   - Style coherence
+
+### Output Phase
+1. Workspace Generation
+   - Hierarchical organization
+   - Relationship mapping
+   - Navigation structure
+
+2. Interactive Elements
+   - Real-time modifications
+   - Version control
+   - Collaboration tools
+
+## 3. Learning Systems
+
+### Continuous Learning
+- Designer interaction tracking
+- Success pattern recognition
+- Style evolution analysis
+
+### Memory Management
+- Indexing strategies
+- Retrieval optimization
+- Pruning mechanisms
+
+## 4. Integration Points
+
+### API Endpoints
+- Brief analysis
+- Asset processing
+- Design generation
+- Quality validation
+
+### Real-time Updates
+- WebSocket connections
+- Progress tracking
+- Collaboration features
+
+## 5. Performance Considerations
+
+### Optimization Strategies
+- Model quantization
+- Batch processing
+- Caching mechanisms
+- Load balancing
+
+### Resource Management
+- Distributed processing (Ray)
+- Memory optimization
+- Storage efficiency
+
+## 6. Future Enhancements
+
+### Planned Features
+- Advanced style transfer
+- Enhanced collaboration tools
+- Automated quality checks
+- Extended memory systems
+
+### Research Areas
+- Novel generation techniques
+- Improved style understanding
+- Enhanced brand preservation
+- Advanced learning systems
