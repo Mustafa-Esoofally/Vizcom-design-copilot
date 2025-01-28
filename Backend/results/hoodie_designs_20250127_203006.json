@@ -1,0 +1,67 @@
+[
+  {
+    "name": "Light Blue Technical Performance Hoodie",
+    "base_prompt": "light blue hoodie",
+    "style": "technical and performance focused",
+    "elements": [
+      "ergonomic hood",
+      "ventilated panels",
+      "reflective details"
+    ],
+    "emphasis": "functionality and innovation",
+    "prompt": "professional product photography of a light blue hoodie, style: technical and performance focused, featuring ergonomic hood, ventilated panels, reflective details, emphasis on functionality and innovation, high-end fashion photography, studio lighting, clean background, detailed fabric texture, photorealistic, 8k resolution, product showcase, commercial photography",
+    "prompt_file": "results\\prompt_technical_performance_20250127_203006.txt"
+  },
+  {
+    "name": "Light Blue Urban Modern Hoodie",
+    "base_prompt": "light blue hoodie",
+    "style": "urban and modern",
+    "elements": [
+      "structured hood",
+      "kangaroo pocket",
+      "minimal branding"
+    ],
+    "emphasis": "contemporary style",
+    "prompt": "professional product photography of a light blue hoodie, style: urban and modern, featuring structured hood, kangaroo pocket, minimal branding, emphasis on contemporary style, high-end fashion photography, studio lighting, clean background, detailed fabric texture, photorealistic, 8k resolution, product showcase, commercial photography",
+    "prompt_file": "results\\prompt_urban_modern_20250127_203006.txt"
+  },
+  {
+    "name": "Light Blue Premium Athletic Hoodie",
+    "base_prompt": "light blue hoodie",
+    "style": "premium and sophisticated",
+    "elements": [
+      "premium zipper",
+      "tailored fit",
+      "refined details"
+    ],
+    "emphasis": "quality and sophistication",
+    "prompt": "professional product photography of a light blue hoodie, style: premium and sophisticated, featuring premium zipper, tailored fit, refined details, emphasis on quality and sophistication, high-end fashion photography, studio lighting, clean background, detailed fabric texture, photorealistic, 8k resolution, product showcase, commercial photography",
+    "prompt_file": "results\\prompt_premium_athletic_20250127_203006.txt"
+  },
+  {
+    "name": "Light Blue Innovative Sport Hoodie",
+    "base_prompt": "light blue hoodie",
+    "style": "innovative and functional",
+    "elements": [
+      "dynamic panels",
+      "tech features",
+      "performance materials"
+    ],
+    "emphasis": "cutting-edge design",
+    "prompt": "professional product photography of a light blue hoodie, style: innovative and functional, featuring dynamic panels, tech features, performance materials, emphasis on cutting-edge design, high-end fashion photography, studio lighting, clean background, detailed fabric texture, photorealistic, 8k resolution, product showcase, commercial photography",
+    "prompt_file": "results\\prompt_innovative_sport_20250127_203006.txt"
+  },
+  {
+    "name": "Light Blue Minimal Essential Hoodie",
+    "base_prompt": "light blue hoodie",
+    "style": "minimal and clean",
+    "elements": [
+      "clean lines",
+      "subtle details",
+      "refined finish"
+    ],
+    "emphasis": "simplicity and elegance",
+    "prompt": "professional product photography of a light blue hoodie, style: minimal and clean, featuring clean lines, subtle details, refined finish, emphasis on simplicity and elegance, high-end fashion photography, studio lighting, clean background, detailed fabric texture, photorealistic, 8k resolution, product showcase, commercial photography",
+    "prompt_file": "results\\prompt_minimal_essential_20250127_203006.txt"
+  }
+]
