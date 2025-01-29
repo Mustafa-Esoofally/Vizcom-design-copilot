@@ -63,52 +63,72 @@ Please format the response with clear sections and detailed observations."""
 
 def main():
     # Initialize GPT-4V
-    model = ChatOpenAI(model="chatgpt-4o-latest", max_tokens=1000)
-    
-    # Create descriptions directory
-    os.makedirs("descriptions", exist_ok=True)
-    
-    # Process Season 1
-    print("\nAnalyzing Season 1 Designs:")
-    print("-" * 80)
-    season1_path = "Vizcom/Season_1"
-    for image_file in sorted(os.listdir(season1_path)):
-        if image_file.endswith(('.webp', '.jpg', '.jpeg', '.png')):
-            name = Path(image_file).stem
-            desc_file = f"descriptions/{name}.txt"
-            
-            if not os.path.exists(desc_file):
-                image_path = os.path.join(season1_path, image_file)
-                print(f"\nGenerating description for: {image_file}")
-                description = generate_fashion_description(image_path, model)
-                
-                # Save description to file
-                with open(desc_file, 'w', encoding='utf-8') as f:
-                    f.write(description)
-                print(f"Description saved to {desc_file}")
-            else:
-                print(f"Description already exists for {image_file}")
-    
-    # Process Season 2
-    print("\nAnalyzing Season 2 Designs:")
-    print("-" * 80)
-    season2_path = "Vizcom/Season_2"
-    for image_file in sorted(os.listdir(season2_path)):
-        if image_file.endswith(('.webp', '.jpg', '.jpeg', '.png')):
-            name = Path(image_file).stem
-            desc_file = f"descriptions/{name}.txt"
-            
-            if not os.path.exists(desc_file):
-                image_path = os.path.join(season2_path, image_file)
-                print(f"\nGenerating description for: {image_file}")
-                description = generate_fashion_description(image_path, model)
-                
-                # Save description to file
-                with open(desc_file, 'w', encoding='utf-8') as f:
-                    f.write(description)
-                print(f"Description saved to {desc_file}")
-            else:
-                print(f"Description already exists for {image_file}")
+    try:
+        model = ChatOpenAI(model="chatgpt-4o-latest", 
+        max_tokens=1000)
+        
+        # Create descriptions directory
+        os.makedirs("descriptions", exist_ok=True)
+        
+        # Process Season 1
+        print("\nAnalyzing Season 1 Designs:")
+        print("-" * 80)
+        season1_path = "Vizcom/Season_1"
+        
+        if not os.path.exists(season1_path):
+            print(f"Warning: {season1_path} does not exist. Skipping Season 1.")
+        else:
+            for image_file in sorted(os.listdir(season1_path)):
+                if image_file.endswith(('.webp', '.jpg', '.jpeg', '.png')):
+                    name = Path(image_file).stem
+                    desc_file = f"descriptions/{name}.txt"
+                    
+                    if not os.path.exists(desc_file):
+                        image_path = os.path.join(season1_path, image_file)
+                        print(f"\nGenerating description for: {image_file}")
+                        try:
+                            description = generate_fashion_description(image_path, model)
+                            
+                            # Save description to file
+                            with open(desc_file, 'w', encoding='utf-8') as f:
+                                f.write(description)
+                            print(f"Description saved to {desc_file}")
+                        except Exception as e:
+                            print(f"Error processing {image_file}: {str(e)}")
+                    else:
+                        print(f"Description already exists for {image_file}")
+        
+        # Process Season 2
+        print("\nAnalyzing Season 2 Designs:")
+        print("-" * 80)
+        season2_path = "Vizcom/Season_2"
+        
+        if not os.path.exists(season2_path):
+            print(f"Warning: {season2_path} does not exist. Skipping Season 2.")
+        else:
+            for image_file in sorted(os.listdir(season2_path)):
+                if image_file.endswith(('.webp', '.jpg', '.jpeg', '.png')):
+                    name = Path(image_file).stem
+                    desc_file = f"descriptions/{name}.txt"
+                    
+                    if not os.path.exists(desc_file):
+                        image_path = os.path.join(season2_path, image_file)
+                        print(f"\nGenerating description for: {image_file}")
+                        try:
+                            description = generate_fashion_description(image_path, model)
+                            
+                            # Save description to file
+                            with open(desc_file, 'w', encoding='utf-8') as f:
+                                f.write(description)
+                            print(f"Description saved to {desc_file}")
+                        except Exception as e:
+                            print(f"Error processing {image_file}: {str(e)}")
+                    else:
+                        print(f"Description already exists for {image_file}")
+                        
+    except Exception as e:
+        print(f"Error initializing the model: {str(e)}")
+        print("Please make sure you have set the OPENAI_API_KEY environment variable.")
 
 if __name__ == "__main__":
     main() 
