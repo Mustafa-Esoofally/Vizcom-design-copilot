@@ -1,3 +1,4 @@
 **/__pycache__/
-.venv/
-Backend/fresh_venv/
+Backend/venv/
+venv/
+fresh_env/
