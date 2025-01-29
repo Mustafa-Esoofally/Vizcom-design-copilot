@@ -72,7 +72,7 @@ def load_fashion_clip_embeddings(embeddings_file: str) -> Dict[str, Any]:
 def generate_image_summaries(image_paths: List[str]) -> List[str]:
     """Generate summaries for images using GPT-4V."""
     # Initialize GPT-4V
-    chat = ChatOpenAI(model="gpt-4-vision-preview", max_tokens=1024)
+    chat = ChatOpenAI(model="gpt-4o", max_tokens=1024)
     
     # Prompt template for image summarization
     prompt = """You are an expert fashion analyst. Describe this fashion design in detail, focusing on:
