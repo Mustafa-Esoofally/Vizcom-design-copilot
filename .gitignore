@@ -2,3 +2,4 @@
 Backend/venv/
 venv/
 fresh_env/
+.env
