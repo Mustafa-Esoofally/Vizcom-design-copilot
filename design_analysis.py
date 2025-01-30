@@ -82,188 +82,140 @@ def main():
 
 class DesignAnalysisAgent:
     def __init__(self, store_path: str = "design_store"):
-        """Initialize the Design Analysis Agent with dual memory system."""
-        # Initialize paths
         self.store_path = store_path
-        
-        # Initialize vision models
-        self.clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-        self.clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-        
-        # Initialize text models
-        self.text_model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
-        self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
-        
-        # Initialize memory systems
-        self.long_term_memory = Chroma(
-            collection_name="brand_guidelines",
-            embedding_function=self.embeddings,
-            persist_directory=os.path.join(store_path, "long_term")
+        self.embeddings = HuggingFaceEmbeddings()
+        self.store = Chroma(
+            persist_directory=store_path,
+            embedding_function=self.embeddings
         )
-        
-        self.short_term_memory = Chroma(
-            collection_name="project_context",
-            embedding_function=self.embeddings,
-            persist_directory=os.path.join(store_path, "short_term")
-        )
-        
-        # Initialize semantic graph
-        self.style_graph = Graph()
-        self.style_ns = Namespace("http://style.org/")
-        self.brand_ns = Namespace("http://brand.org/")
         
     def analyze_brief(self, brief_text: str, reference_images: List[str], brand_guidelines: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze design brief and extract key style attributes."""
-        # Extract text embeddings
-        brief_embedding = self.text_model.encode(brief_text)
+        # Embed brief text
+        brief_embedding = self.embeddings.embed_query(brief_text)
+        brief_embedding = torch.tensor(brief_embedding)
         
-        # Process reference images
-        image_features = []
-        for img_path in reference_images:
-            features = self.extract_image_features(img_path)
-            image_features.append(features)
+        # Extract features from reference images
+        image_features = [
+            self.extract_image_features(img_path)
+            for img_path in reference_images
+        ]
         
-        # Store in short-term memory
+        # Store project context
         self.store_project_context(brief_text, image_features, brand_guidelines)
         
         # Extract style attributes
         style_attributes = self.extract_style_attributes(brief_embedding, image_features)
         
-        # Build semantic relationships
+        # Build style knowledge graph
         self.build_style_graph(style_attributes, brand_guidelines)
+        
+        # Get relevant brand context
+        brand_context = self.get_brand_context(style_attributes)
+        
+        # Generate design direction
+        design_direction = self.generate_design_direction(brief_embedding, style_attributes)
         
         return {
             'style_attributes': style_attributes,
-            'brand_context': self.get_brand_context(style_attributes),
-            'design_direction': self.generate_design_direction(brief_embedding, style_attributes)
+            'brand_context': brand_context,
+            'design_direction': design_direction
         }
-    
+
     def extract_image_features(self, image_path: str) -> torch.Tensor:
-        """Extract visual features from reference image using CLIP."""
-        image = self.clip_processor.image_from_path(image_path)
-        inputs = self.clip_processor(images=image, return_tensors="pt")
-        features = self.clip_model.get_image_features(**inputs)
-        return features
-    
+        image = Image.open(image_path)
+        processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+        inputs = processor(images=image, return_tensors="pt")
+        features = model.get_image_features(**inputs)
+        return features.squeeze()
+
     def store_project_context(self, brief_text: str, image_features: List[torch.Tensor], 
                             brand_guidelines: Dict[str, Any]):
-        """Store project context in short-term memory."""
-        # Create document for context
-        context = {
-            'brief': brief_text,
-            'image_features': [f.tolist() for f in image_features],
-            'brand_guidelines': brand_guidelines
-        }
-        
-        self.short_term_memory.add_texts(
+        # Store brief embedding
+        brief_embedding = self.embeddings.embed_query(brief_text)
+        self.store.add_texts(
             texts=[brief_text],
-            metadatas=[context]
+            embeddings=[brief_embedding],
+            metadatas=[{'type': 'brief'}]
         )
-    
+        
+        # Store image features
+        for idx, features in enumerate(image_features):
+            self.store.add_texts(
+                texts=[f"image_{idx}"],
+                embeddings=[features.tolist()],
+                metadatas=[{'type': 'image'}]
+            )
+
     def extract_style_attributes(self, brief_embedding: torch.Tensor, 
                                image_features: List[torch.Tensor]) -> Dict[str, Any]:
-        """Extract style attributes from brief and reference images."""
-        # Combine text and visual features
+        # Combine brief and image features
         combined_features = torch.cat([brief_embedding.unsqueeze(0)] + image_features)
         
-        # Extract key style elements
+        # Extract key style attributes
         style_attributes = {
-            'silhouette': self.analyze_silhouette(combined_features),
-            'materials': self.analyze_materials(combined_features),
-            'color_palette': self.analyze_colors(combined_features),
-            'design_elements': self.analyze_design_elements(combined_features)
+            'silhouette': ['relaxed', 'tailored'],
+            'materials': ['wool', 'cotton'],
+            'colors': ['blue', 'grey'],
+            'design_elements': ['pleats', 'pockets']
         }
         
         return style_attributes
-    
+
     def build_style_graph(self, style_attributes: Dict[str, Any], 
                          brand_guidelines: Dict[str, Any]):
-        """Build semantic graph of style relationships."""
+        g = Graph()
+        ns = Namespace("http://fashion.org/")
+        
         # Add style nodes
         for category, attributes in style_attributes.items():
-            category_uri = URIRef(self.style_ns[category])
             for attr in attributes:
-                self.style_graph.add((
-                    category_uri,
-                    self.style_ns.hasAttribute,
+                g.add((
+                    URIRef(ns[category]),
+                    URIRef(ns['has_attribute']),
                     Literal(attr)
                 ))
-        
-        # Add brand constraints
+                
+        # Add brand guideline nodes
         for guideline, value in brand_guidelines.items():
-            self.style_graph.add((
-                URIRef(self.brand_ns[guideline]),
-                self.brand_ns.constrains,
-                Literal(value)
+            g.add((
+                URIRef(ns['brand']),
+                URIRef(ns[guideline]),
+                Literal(str(value))
             ))
-    
-    def get_brand_context(self, style_attributes: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Retrieve relevant brand context from long-term memory."""
-        # Create search query from style attributes
-        query = " ".join([
-            f"{category}: {', '.join(attrs)}"
-            for category, attrs in style_attributes.items()
-        ])
         
-        # Search long-term memory
-        results = self.long_term_memory.similarity_search(query)
-        return [doc.metadata for doc in results]
-    
-    def generate_design_direction(self, brief_embedding: torch.Tensor, 
-                                style_attributes: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate high-level design direction based on analysis."""
-        # Query project context
-        context = self.short_term_memory.similarity_search(
-            "design direction",
+        # Save graph
+        g.serialize("style_graph.ttl")
+
+    def get_brand_context(self, style_attributes: Dict[str, Any]) -> List[Dict[str, Any]]:
+        # Query similar styles from brand history
+        similar_styles = self.store.similarity_search(
+            json.dumps(style_attributes),
             k=3
         )
-        
-        # Combine with style attributes
+        return [
+            {'id': doc.metadata['id'], 'similarity': doc.metadata['score']}
+            for doc in similar_styles
+        ]
+
+    def generate_design_direction(self, brief_embedding: torch.Tensor, 
+                                style_attributes: Dict[str, Any]) -> Dict[str, Any]:
+        # Generate concrete design direction
         direction = {
-            'primary_theme': self.extract_theme(brief_embedding),
-            'key_elements': style_attributes['design_elements'][:3],
-            'material_focus': style_attributes['materials'][:2],
-            'color_strategy': self.generate_color_strategy(style_attributes['color_palette']),
-            'silhouette_direction': style_attributes['silhouette'][:2]
-        }
-        
-        return direction
-    
-    def analyze_silhouette(self, features: torch.Tensor) -> List[str]:
-        """Analyze and extract silhouette attributes."""
-        # Implement silhouette analysis logic
-        return ['structured', 'relaxed', 'fitted']
-    
-    def analyze_materials(self, features: torch.Tensor) -> List[str]:
-        """Analyze and extract material attributes."""
-        # Implement material analysis logic
-        return ['technical fabric', 'performance mesh', 'waterproof']
-    
-    def analyze_colors(self, features: torch.Tensor) -> List[str]:
-        """Analyze and extract color attributes."""
-        # Implement color analysis logic
-        return ['navy', 'charcoal', 'red accent']
-    
-    def analyze_design_elements(self, features: torch.Tensor) -> List[str]:
-        """Analyze and extract design element attributes."""
-        # Implement design element analysis logic
-        return ['asymmetric zip', 'reflective details', 'ventilation panels']
-    
-    def extract_theme(self, brief_embedding: torch.Tensor) -> str:
-        """Extract primary theme from brief embedding."""
-        # Implement theme extraction logic
-        return "urban performance"
-    
-    def generate_color_strategy(self, colors: List[str]) -> Dict[str, List[str]]:
-        """Generate color strategy from analyzed colors."""
-        return {
-            'primary': colors[:2],
-            'accent': colors[2:],
-            'combinations': [
-                ['navy', 'red'],
-                ['charcoal', 'red']
+            'primary_elements': [
+                {'type': 'silhouette', 'value': style_attributes['silhouette'][0]},
+                {'type': 'material', 'value': style_attributes['materials'][0]}
+            ],
+            'secondary_elements': [
+                {'type': 'color', 'value': style_attributes['colors'][0]},
+                {'type': 'detail', 'value': style_attributes['design_elements'][0]}
+            ],
+            'constraints': [
+                'maintain brand DNA',
+                'seasonal appropriateness'
             ]
-        }
+    }
+        return direction
 
 if __name__ == "__main__":
     main() 
